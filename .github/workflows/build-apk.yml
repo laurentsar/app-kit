@@ -13,19 +13,19 @@ name: Build APK (partagé)
 on:
   workflow_call:
     inputs:
-      apk-name:
+      apk_name:
         description: "Base du nom de l'APK et de l'artefact (ex. bornes-ve)"
         required: true
         type: string
-      release-name:
+      release_name:
         description: "Nom affiché de la release (ex. Bornes VE), suivi de la version"
         required: true
         type: string
-      regen-android:
+      regen_android:
         description: "Régénérer android/ au build (dépôts qui ne versionnent pas la plateforme)"
         default: false
         type: boolean
-      ci-scripts:
+      ci_scripts:
         description: "Scripts ci/*.py à exécuter dans l'ordre, séparés par des espaces"
         default: ""
         type: string
@@ -37,10 +37,10 @@ on:
         description: "Installer NDK + CMake (apps avec du code natif à compiler)"
         default: false
         type: boolean
-      node-version:
+      node_version:
         default: "20"
         type: string
-      java-version:
+      java_version:
         default: "17"
         type: string
 
@@ -56,13 +56,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node-version }}
+          node-version: ${{ inputs.node_version }}
 
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: ${{ inputs.java-version }}
+          java-version: ${{ inputs.java_version }}
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -77,7 +77,7 @@ jobs:
       # android/ n'est pas versionné dans certaines apps : on le régénère, ce
       # qui évite de maintenir à la main un dossier généré de 400 fichiers.
       - name: Regenerate Android platform
-        if: inputs.regen-android
+        if: inputs.regen_android
         run: |
           rm -rf android
           npx cap add android
@@ -90,9 +90,9 @@ jobs:
       # exécutés dans l'ordre donné : l'ordre compte, patch_signing.py doit
       # passer avant que Gradle lise sa configuration.
       - name: Run app CI scripts
-        if: inputs.ci-scripts != ''
+        if: inputs.ci_scripts != ''
         run: |
-          for s in ${{ inputs.ci-scripts }}; do
+          for s in ${{ inputs.ci_scripts }}; do
             echo "::group::$s"
             python3 "$s"
             echo "::endgroup::"
@@ -128,13 +128,13 @@ jobs:
           echo "Version détectée : $VERSION"
 
       - name: Rename APK with version
-        run: cp android/app/build/outputs/apk/release/app-release.apk "${{ inputs.apk-name }}-${{ steps.version.outputs.version }}.apk"
+        run: cp android/app/build/outputs/apk/release/app-release.apk "${{ inputs.apk_name }}-${{ steps.version.outputs.version }}.apk"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.apk-name }}-release-apk
-          path: ${{ inputs.apk-name }}-${{ steps.version.outputs.version }}.apk
+          name: ${{ inputs.apk_name }}-release-apk
+          path: ${{ inputs.apk_name }}-${{ steps.version.outputs.version }}.apk
           if-no-files-found: error
 
       - name: Create / update GitHub Release
@@ -142,8 +142,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          name: ${{ inputs.release-name }} v${{ steps.version.outputs.version }}
-          files: ${{ inputs.apk-name }}-${{ steps.version.outputs.version }}.apk
+          name: ${{ inputs.release_name }} v${{ steps.version.outputs.version }}
+          files: ${{ inputs.apk_name }}-${{ steps.version.outputs.version }}.apk
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -20,14 +20,18 @@ jobs:
   build:
     uses: laurentsar/app-kit/.github/workflows/build-apk.yml@v1
     with:
-      apk-name: bornes-ve
-      release-name: Bornes VE
+      apk_name: bornes-ve
+      release_name: Bornes VE
     secrets: inherit
 ```
 
-Entrées disponibles : `apk-name`, `release-name`, `regen-android`,
-`ci-scripts` (scripts `ci/*.py` à jouer dans l'ordre), `pillow`, `ndk`,
-`node-version`, `java-version`.
+Entrées disponibles : `apk_name`, `release_name`, `regen_android`,
+`ci_scripts` (scripts `ci/*.py` à jouer dans l'ordre), `pillow`, `ndk`,
+`node_version`, `java_version`.
+
+Les noms d'entrées sont en `snake_case` volontairement : dans une expression,
+`${{ inputs.apk-name }}` est lu par GitHub comme une soustraction et fait
+échouer le workflow au parsing, avant tout job (`startup_failure`).
 
 `secrets: inherit` transmet `ANDROID_KEYSTORE_B64` et
 `ANDROID_KEYSTORE_PASSWORD`, qui doivent exister dans le dépôt appelant.
