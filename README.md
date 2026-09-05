@@ -18,6 +18,12 @@ on:
 
 jobs:
   build:
+    # Obligatoire : un workflow appelé ne peut pas s'octroyer plus de droits
+    # que son appelant. Sans ce bloc, le run échoue au parsing avec
+    # « nested job is requesting contents: write, but is only allowed
+    # contents: read » — la publication de la release a besoin de l'écriture.
+    permissions:
+      contents: write
     uses: laurentsar/app-kit/.github/workflows/build-apk.yml@v1
     with:
       apk_name: bornes-ve
