@@ -1,0 +1,51 @@
+# app-kit — CI partagé des applications Capacitor
+
+Workflows GitHub Actions réutilisables (`workflow_call`) appelés par les dépôts
+d'applications. Objectif : une seule chaîne de build à maintenir au lieu d'une
+copie divergente par app (elles allaient de 79 à 134 lignes, toutes légèrement
+différentes).
+
+## Utilisation depuis une app
+
+`.github/workflows/build-apk.yml` du dépôt de l'app :
+
+```yaml
+name: Build Android APK
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: laurentsar/app-kit/.github/workflows/build-apk.yml@v1
+    with:
+      apk-name: bornes-ve
+      release-name: Bornes VE
+    secrets: inherit
+```
+
+Entrées disponibles : `apk-name`, `release-name`, `regen-android`,
+`ci-scripts` (scripts `ci/*.py` à jouer dans l'ordre), `pillow`, `ndk`,
+`node-version`, `java-version`.
+
+`secrets: inherit` transmet `ANDROID_KEYSTORE_B64` et
+`ANDROID_KEYSTORE_PASSWORD`, qui doivent exister dans le dépôt appelant.
+
+## Ce dépôt ne contient aucune clé
+
+Les keystores et leurs mots de passe vivent uniquement dans `~/app-kit/keys`
+(poste local) et dans les secrets GitHub de chaque dépôt. C'est précisément
+pourquoi ce dépôt-ci est séparé de `~/app-kit` : ce dernier contient les clés
+et ne doit jamais être poussé.
+
+Ce dépôt est public parce qu'un workflow réutilisable hébergé dans un dépôt
+privé ne peut pas être appelé par un dépôt public.
+
+## Versionnement
+
+Les apps épinglent un tag (`@v1`). Un changement de comportement se publie en
+`v2` : les apps migrent une par une, et un build déjà vert ne casse pas parce
+qu'on a touché ici. Après chaque migration, vérifier le certificat de l'APK
+produit (`~/app-kit/tools/verify_apk_cert.py`) — un build vert signé de la
+mauvaise clé donne une mise à jour qu'Android refuse d'installer.
