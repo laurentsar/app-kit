@@ -66,6 +66,14 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # 'tools' (paquet legacy du SDK Manager, distinct de cmdline-tools)
+          # n'existe plus dans le dépôt Google — c'est le défaut de cette
+          # action ("tools platform-tools"), qui échoue donc désormais
+          # systématiquement. platform-tools (adb...) suffit : les
+          # plateformes/build-tools sont résolues par Gradle lui-même
+          # pendant le build, une fois les licences acceptées.
+          packages: 'platform-tools'
 
       - name: Install NDK and CMake
         if: inputs.ndk
